@@ -20,17 +20,21 @@ public class Launcher  {
         commands.add(new Fibo());
         commands.add(new Quit());
         commands.add(new Predict());
-        while (!"quit".equalsIgnoreCase(input)) {
+        while (true) {
             boolean found = false;
+            boolean result = false;
             for (Command command : commands) {
                 if (command.name().equalsIgnoreCase(input)) {
                     found = true;
-                    command.run(scanner);
+                    result = command.run(scanner);
                     break;
                 }
             }
             if (!found) {
                 System.out.println("Unknown command");
+            }
+            if (result) {
+                break;
             }
             System.out.println("Entrez une commande :");
             input = scanner.nextLine();
