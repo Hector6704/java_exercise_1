@@ -1,13 +1,9 @@
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 import java.io.IOException;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 interface Command {
     String name();
@@ -68,31 +64,54 @@ class Predict implements Command {
             assert content != null;
             if (!content.isBlank()) {
                 content = content.toLowerCase();
-                Stream<String> stream = Arrays.stream(content.split(" ")).filter(word -> !word.isEmpty());
-                Map<String, Long> result = stream.collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
-                result.entrySet().stream().sorted(Map.Entry.<String, Long>comparingByValue().reversed()).limit(3).forEach(entry -> System.out.print(entry.getKey() + " "));
-                System.out.println("Entrez un mot :");
-                String word = scanner.nextLine();
-                if (!result.containsKey(word)) {
-                    System.out.println("Le mot " + word + " n'est pas présent dans le fichier");
-                    return false;
-                }
-                Map<String, Long> neighbourResult = null;
-                for (int i = 0; i < 3; i++) {
-                    neighbourResult = new HashMap<>();
-                    for (Map.Entry<String, Long> stringLongEntry : result.entrySet()) {
-                        if (stringLongEntry.getKey().startsWith(word)) {
-                            neighbourResult.merge(String.valueOf(stringLongEntry), 1L, Long::sum);
+                content = content.replaceAll("\\r\\n|\\r|\\n", " ");
+                Map<String, String> map = new HashMap<>();
+                String[] words = content.replaceAll("[^\\w\\s]", "").split(" ");
+                for (int i = 0; i < words.length - 1; i++) {
+                    String word = words[i];
+                    String nextWord = words[i + 1];
+                    if (map.containsKey(word)) {
+                        String mostFrequentFollowingWord = map.get(word);
+                        if (countOccurrences(content, word, nextWord) > countOccurrences(content, word, mostFrequentFollowingWord)) {
+                            map.put(word, nextWord);
+                        }
+                    } else {
+                        if (!word.isEmpty()) {
+                            map.put(word, nextWord);
                         }
                     }
-                    neighbourResult.entrySet().stream().sorted(Map.Entry.<String, Long>comparingByValue().reversed()).limit(1).forEach(entry -> System.out.print(entry.getKey() + " "));
                 }
-                System.out.println("Result :" + neighbourResult);
+                System.out.println(map);
+                System.out.println("Entrez un mot : ");
+                String word = scanner.nextLine();
+                String result = word;
+                for (int i = 0; i < 20; i++) {
+                    if (map.containsKey(word)) {
+                        result += " " + map.get(word);
+                        word = map.get(word);
+                    } else {
+                        break;
+                    }
+                }
+                System.out.println(result);
                 return false;
             } else {
                 System.out.println("Empty file");
             }
         }
         return false;
+    }
+
+    private int countOccurrences(String content, String word, String nextWord) {
+        int count = 0;
+        int index = 0;
+        while (index != -1) {
+            index = content.indexOf(word + " " + nextWord, index);
+            if (index != -1) {
+                count++;
+                index += word.length() + nextWord.length() + 1;
+            }
+        }
+        return count;
     }
 }

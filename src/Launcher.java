@@ -12,8 +12,8 @@ import java.util.stream.Stream;
 
 public class Launcher  {
     public static void main(String[] args) throws IOException {
-        System.out.println("Bonjour");
         var scanner = new Scanner(System.in);
+        System.out.println("Entrez une commande :");
         String input = scanner.nextLine();
         List<Command> commands = new ArrayList<>();
         commands.add(new Freq());
@@ -32,6 +32,7 @@ public class Launcher  {
             if (!found) {
                 System.out.println("Unknown command");
             }
+            System.out.println("Entrez une commande :");
             input = scanner.nextLine();
         }
     }
@@ -52,7 +53,8 @@ public class Launcher  {
             var content = Files.readString(path1);
             if (!content.isBlank()) {
                 content = content.toLowerCase();
-                Stream<String> stream = Arrays.stream(content.replaceAll("[^a-zA-Z ]", "").split(" ")).filter(word -> !word.isEmpty());
+                content = content.replaceAll("\\r\\n|\\r|\\n", " ");
+                Stream<String> stream = Arrays.stream(content.replaceAll("[^\\w\\s ]", "").split(" ")).filter(word -> !word.isEmpty());
                 Map<String,Long> result = stream.collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
                 result.entrySet().stream().sorted(Map.Entry.<String, Long>comparingByValue().reversed()).limit(3).forEach(entry -> System.out.print(entry.getKey() + " "));
             } else {
