@@ -42,9 +42,9 @@ class Predict implements Command {
                         }
                     }
                 }
-                System.out.println(map);
                 System.out.println("Entrez un mot : ");
                 String word = scanner.nextLine();
+                word = word.toLowerCase();
                 String result = word;
                 for (int i = 0; i < 19; i++) {
                     if (map.containsKey(word)) {
