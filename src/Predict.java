@@ -46,7 +46,7 @@ class Predict implements Command {
                 System.out.println("Entrez un mot : ");
                 String word = scanner.nextLine();
                 String result = word;
-                for (int i = 0; i < 20; i++) {
+                for (int i = 0; i < 19; i++) {
                     if (map.containsKey(word)) {
                         result += " " + map.get(word);
                         word = map.get(word);
